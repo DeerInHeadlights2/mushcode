@@ -508,7 +508,9 @@ th u(NEWCOBJ,Division Object Parent <GOP>,dop,u(cobj,group),,,WIZARD SAFE,INHERI
 
 &GRP`GROUP`ALL [u(cobj,group)]=@select/inline strlen(%0)=0,{@attach %!/INC`TARGET},{@attach %!/INC`VALID`GROUP=%0,1};th u(setq,online,0);th u(setq,all,1);@attach %!/GRP`GWHO`LIST
 
-&DISPLAY`STANDARD [u(cobj,group)]=@pemit %#=ansi(u(color,%#,GROUPS,COLUMN_NAMES),align(24 20 25 6,Name,Rank,Title,Idle))%R[u(separator)];@dolist/inline/delimit [chr(176)] [u(filter,GAPPROVE,u(filter,if(%q<online>,ONLINE,EXISTMEMBER),u(mysql3,SELECT`MEMBERS,%q<g1id>),chr(176),chr(176),%q<lwhoid>),chr(176),chr(176),cor(%q<all>,u(conf,SHOW_UNAPPROVED)))]={@pemit %#=align(24 20 25 >6,u(pueblize,u(getmoniker,u(setr,mem,elements(u(setr,data,u(choosegame,%i0,%d0)),1,chr(177)))),+finger [name(%q<mem>)]),elements(%q<data>,3,chr(177)),elements(%q<data>,4,chr(177)),u(lastidle,%q<mem>,%#))}
+&FN`STANDARD`FOOTERS [u(cobj,group)]=switch(%0,APPROVED,,CLAIMED,u(FOOTER,Claimed)%r,OPEN,u(FOOTER,Available for App)%r,Tiny-Plot,u(FOOTER,Tiny-Plot)%r,DEAD,u(FOOTER,He's dead Jim)%r)
+
+&DISPLAY`STANDARD [u(cobj,group)]=@pemit %#=ansi(u(color,%#,GROUPS,COLUMN_NAMES),align(24 20 25 6,Name,Rank,Title,Idle))%R[u(separator)];@dolist/inline APPROVED CLAIMED OPEN Tiny-Plot DEAD={th setq(doheader,1);@dolist/inline/delimit [chr(176)] [u(filter,GAPPROVE,u(filter,if(%q<online>,ONLINE,EXISTMEMBER),u(mysql3,SELECT`MEMBERS`STATUS,%iL,%q<g1id>),chr(176),chr(176),%q<lwhoid>),chr(176),chr(176),cor(%q<all>,u(conf,SHOW_UNAPPROVED)))]={@pemit %#=[if(%q<doheader>,u(FN`STANDARD`FOOTERS,%iL),)][align(24 20 25 >6,u(pueblize,u(getmoniker,u(setr,mem,elements(u(setr,data,u(choosegame,%i0,%d0)),1,chr(177)))),+finger [name(%q<mem>)]),elements(%q<data>,3,chr(177)),elements(%q<data>,4,chr(177)),u(lastidle,%q<mem>,%#))];th setq(doheader,0);}}
 
 &FIL`GAPPROVE [u(cobj,group)]=cor(%1,u(isapproved,first(%0,chr(177))))
 
@@ -523,6 +525,8 @@ th u(NEWCOBJ,Division Object Parent <GOP>,dop,u(cobj,group),,,WIZARD SAFE,INHERI
 &Q`SELECT`RANK_COMPARE [u(cobj,group)]=SELECT character_objid,group_rank_number,group_rank_title,group_member_title FROM volv_group_member WHERE group_id=? AND group_rank_number! ORDER BY group_rank_number ASC,character_name ASC
 
 &Q`SELECT`MEMBERS [u(cobj,group)]=SELECT character_objid,group_rank_number,group_rank_title,group_member_title FROM volv_group_member WHERE group_id=? ORDER BY group_rank_number ASC,character_name ASC
+
+&Q`SELECT`MEMBERS`STATUS [u(cobj,group)]=SELECT vgm.character_objid,vgm.group_rank_number,vgm.group_rank_title,vgm.group_member_title FROM volv_group_member vgm JOIN volv_character vc ON (vc.character_id=vgm.character_id and character_status=?) WHERE group_id=? ORDER BY vgm.group_rank_number ASC,vgm.character_name ASC;
 
 &Q`SELECT`MEMBERS_UNASSIGNED [u(cobj,group)]=SELECT character_objid,group_rank_number,group_rank_title,group_member_title FROM volv_group_member WHERE group_id=? AND character_id NOT IN (SELECT character_id FROM volv_group_member WHERE group_parent=?) AND group_rank_number! ORDER BY group_rank_number ASC,character_name ASC
 
