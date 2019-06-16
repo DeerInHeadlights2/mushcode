@@ -11,3 +11,111 @@ th u(NEWCOBJ,Staff Globals <SGLOB>,sglob,,,,WIZARD SAFE !NO_COMMAND,INHERIT SIDE
 
 &CMD`+DARK [u(cobj,sglob)]=$^(?s)(?\:\+)?dark(?\:/(\S+)?)?$:@attach %!/INC`PARTIAL=%1,ON|OFF,|,switch,switch;@select/inline haspower(%#,can_dark)=0,{@power %#=can_dark};@select/inline %q<switch>=OFF,{@set %#=!dark;@dolist/inline ports(%#)=@hide/off %i0;@pemit %#=Shown.},ON,{@set %#=dark;@dolist/inline ports(%#)=@hide/on %i0;@pemit %#=Hidden.},{@attach %!/CMD`+DARK=,if(hasflag(%#,DARK),Off,On)}
 @set [u(cobj,sglob)]/CMD`+DARK=regexp
+
+&CMD`MAKEWIKI`ALL [u(cobj,sglob)]=$+MAKEWIKI *:@switch [setr(0,pmatch(%0))][setq(1,sqlescape(name(%q0)))]=#-1,{@pemit %#=Could not find a player that goes by %0.},#-2,{@pemit %#=More than one player matches %0.},{@dolist/inline CHARACTERNEW NAME COLOR TEXTCOLOR CHAR`ID IMG FULLNAME GENDER SPECIES THEME CHARTYPE ACTIVE OCCUPATION CITIZENSHIP RESIDENCE EDUCATION GROUPS QUOTE PAGE AAGE DOB HEIGHT WEIGHT HAIR EYES ACTOR SONG PROFILE APPROVEDDATE DESCRIPTION PERSONALITY HISTORY ABILITIES SKILLS RESOURCES WEAKNESSES CHARACTERNEWCLOSE GALLERY GALLERYCLOSE CATEGORIES GENOTHERS=@pemit %#=u(%!/FUN`MAKEWIKI`%i0,%q0,%q1);@attach %!/INC`MSG={The entire sheet should be proofed with the wiki's preview. Age values and Quotes especially. Boxes around text are due to spaces beginning a line. Other wiki formatting can result from other characters at the start of a line.  Avoid overwriting existing galleries.},%#,MAKEWIKI;@pemit %#=u(%!/FUN`MAKEWIKI`GENOTHER,%q0,%q1)}
+
+&DAT`MAKEWIKI`GROUP`TRANSLATION [u(cobj,sglob)]=Cybertron, Cybertron-OOC, Dark Universe (OOC), Dark Universe-OOC, Gem Cities (OOC), Gem Cities-OOC, Gotham (OOC), Gotham-OOC, Guardians, Guardians of the Galaxy, Martial Arts (OOC), Martial Arts-OOC, Mutant (OOC), Mutant-OOC, Space (OOC), Space-OOC, Starling (OOC), Starling-OOC, Street Level (OOC), Street Level-OOC, World of Tomorrow (OOC), World of Tomorrow-OOC
+
+&FUN`MAKEWIKI`AAGE [u(cobj,sglob)]=|AAge=[add(div(sub(secs(),convtime([first(rest(setr(2,get(*%0/D`FINGER`DATEOFBIRTH))))] [first(%q2)] [last(%q2)])), 31536000),8)]
+
+&FUN`MAKEWIKI`ABILITIES [u(cobj,sglob)]=|Abilities=[iter({[sql(u(Q`MAKEWIKI`SELECT`ABILITIES,%1),±,|)]},<span style="color:#8a14ff">'''[u(capnames,first({##},|))]'''</span>%r<br>%r[edit(last({##},|),%r,<br>%r)],±,%r<br>%r)]
+
+&FUN`MAKEWIKI`ACTIVE [u(cobj,sglob)]=|Active=[get(*%0/V`THEME`STATUS)]
+
+&FUN`MAKEWIKI`ACTOR [u(cobj,sglob)]=|Actor=[get(*%0/D`FINGER`PLAYEDBY)]
+
+&FUN`MAKEWIKI`APPROVEDDATE [u(cobj,sglob)]====Current Player Approved: [timefmt($B $d\, $Y, get(*%0/D`APPROVED))]===
+
+&FUN`MAKEWIKI`CATEGORIES [u(cobj,sglob)]=[edit({[iter(sql(u(Q`MAKEWIKI`SELECT`GROUPS,%1),|),\[\[Category:##\]\],|,%b)]},Cybertron,Cybertron-OOC,Dark Universe (OOC),Dark Universe-OOC,Gem Cities (OOC),Gem Cities-OOC,Gotham (OOC),Gotham-OOC,Guardians,Guardians of the Galaxy,Martial Arts (OOC),Martial Arts-OOC,Mutant (OOC),Mutant-OOC,Space (OOC),Space-OOC,Starling (OOC),Starling-OOC,Street Level (OOC),Street Level-OOC,World of Tomorrow (OOC),World of Tomorrow-OOC)]
+
+&FUN`MAKEWIKI`CHARACTERNEW [u(cobj,sglob)]=\{\{CharacterNew
+
+&FUN`MAKEWIKI`CHARACTERNEWCLOSE [u(cobj,sglob)]=\}\}
+
+&FUN`MAKEWIKI`CHARTYPE [u(cobj,sglob)]=|Chartype=[get(*%0/D`FINGER`TYPE)]
+
+&FUN`MAKEWIKI`CHAR`ID [u(cobj,sglob)]=|Char_id=[sql(u(Q`MAKEWIKI`SELECT`CHARID,%1))]
+
+&FUN`MAKEWIKI`CITIZENSHIP [u(cobj,sglob)]=|Citizenship=[get(*%0/D`FINGER`CITIZENSHIP)]
+
+&FUN`MAKEWIKI`COLOR [u(cobj,sglob)]=|Color=#333
+
+&FUN`MAKEWIKI`DESCRIPTION [u(cobj,sglob)]=|Description=[iter({[sql(u(Q`MAKEWIKI`SELECT`DESCRIPTION,%1),±,|)]},<span style="color:#4040bf">'''[u(capnames,first({##},|))]'''</span>%r<br>%r[edit(last({##},|),%r,<br>%r)],±,%r<br>%r)]
+
+&FUN`MAKEWIKI`DOB [u(cobj,sglob)]=|DOB=[get(*%0/D`FINGER`DATEOFBIRTH)]
+
+&FUN`MAKEWIKI`EDUCATION [u(cobj,sglob)]=|Education=[get(*%0/D`FINGER`EDUCATION)]
+
+&FUN`MAKEWIKI`EYES [u(cobj,sglob)]=|Eyes=[get(*%0/D`FINGER`EYES)]
+
+&FUN`MAKEWIKI`FULLNAME [u(cobj,sglob)]=|FullName=[get(*%0/D`FINGER`REALNAME)]
+
+&FUN`MAKEWIKI`GALLERY [u(cobj,sglob)]=<gallery>
+
+&FUN`MAKEWIKI`GALLERYCLOSE [u(cobj,sglob)]=</gallery>
+
+&FUN`MAKEWIKI`GENDER [u(cobj,sglob)]=|Gender=[get(*%0/sex)]
+
+&FUN`MAKEWIKI`GENOTHER [u(cobj,sglob)]=[setq(genother,[sql(u(Q`MAKEWIKI`SELECT`GENOTHER,%1),|)])][if(%q<genother>,{%r%rThe following +GEN section(s) were found not starting with "Desc", "Hist" or "Pers" and may require manual handling: [ansi(#00CCCC,[iter({%q<genother>},%b##,|,\,)])]},)]
+
+&FUN`MAKEWIKI`GROUPS [u(cobj,sglob)]=|Groups=[edit({[iter(sql(u(Q`MAKEWIKI`SELECT`GROUPS,%1),|),\[\[##\]\],|,\,%b)]},Cybertron,Cybertron-OOC,Dark Universe (OOC),Dark Universe-OOC,Gem Cities (OOC),Gem Cities-OOC,Gotham (OOC),Gotham-OOC,Guardians,Guardians of the Galaxy,Martial Arts (OOC),Martial Arts-OOC,Mutant (OOC),Mutant-OOC,Space (OOC),Space-OOC,Starling (OOC),Starling-OOC,Street Level (OOC),Street Level-OOC,World of Tomorrow (OOC),World of Tomorrow-OOC)]
+
+&FUN`MAKEWIKI`HAIR [u(cobj,sglob)]=|Hair=[get(*%0/D`FINGER`HAIR)]
+
+&FUN`MAKEWIKI`HEIGHT [u(cobj,sglob)]=|Height=[get(*%0/D`FINGER`HEIGHT)]
+
+&FUN`MAKEWIKI`HISTORY [u(cobj,sglob)]=|History=[iter({[sql(u(Q`MAKEWIKI`SELECT`HISTORY,%1),±,|)]},<span style="color:#009999">'''[u(capnames,first({##},|))]'''</span>%r<br>%r[edit(last({##},|),%r,<br>%r)],±,%r<br>%r)]
+
+&FUN`MAKEWIKI`IMG [u(cobj,sglob)]=|Img=[get(*%0/D`FINGER`PICTURE)]
+
+&FUN`MAKEWIKI`NAME [u(cobj,sglob)]=|NameOnMUSH=[name(*%0)]
+
+&FUN`MAKEWIKI`OCCUPATION [u(cobj,sglob)]=|Occupation=[get(*%0/D`FINGER`OCCUPATION)]
+
+&FUN`MAKEWIKI`PAGE [u(cobj,sglob)]=|PAge=[add(div(sub(secs(),convtime([first(rest(setr(2,get(*%0/D`FINGER`DATEOFBIRTH))))] [first(%q2)] [last(%q2)])), 31536000),8)]
+
+&FUN`MAKEWIKI`PERSONALITY [u(cobj,sglob)]=|Personality=[iter({[sql(u(Q`MAKEWIKI`SELECT`PERSONALITY,%1),±,|)]},<span style="color:#1f75FE">'''[u(capnames,first({##},|))]'''</span>%r<br>%r[edit(last({##},|),%r,<br>%r)],±,%r<br>%r)]
+
+&FUN`MAKEWIKI`PROFILE [u(cobj,sglob)]=|Profile=[edit(get(*%0/D`FINGER`PROFILE),%r,<br>%r)]
+
+&FUN`MAKEWIKI`QUOTE [u(cobj,sglob)]=|Quote=[get(*%0/D`FINGER`QUOTE)]
+
+&FUN`MAKEWIKI`RESIDENCE [u(cobj,sglob)]=|Residence=[get(*%0/D`FINGER`RESIDENCE)]
+
+&FUN`MAKEWIKI`RESOURCES [u(cobj,sglob)]=|Resources=[iter({[sql(u(Q`MAKEWIKI`SELECT`RESOURCES,%1),±,|)]},<span style="color:#228B22">'''[u(capnames,first({##},|))]'''</span>%r<br>%r[edit(last({##},|),%r,<br>%r)],±,%r<br>%r)]
+
+&FUN`MAKEWIKI`SKILLS [u(cobj,sglob)]=|Skills=[iter({[sql(u(Q`MAKEWIKI`SELECT`SKILLS,%1),±,|)]},<span style="color:#00CED1">'''[u(capnames,first({##},|))]'''</span>%r<br>%r[edit(last({##},|),%r,<br>%r)],±,%r<br>%r)]
+
+&FUN`MAKEWIKI`SONG [u(cobj,sglob)]=|Song=[get(*%0/D`FINGER`THEMESONG)]
+
+&FUN`MAKEWIKI`SPECIES [u(cobj,sglob)]=|Species=[get(*%0/D`FINGER`SPECIES)]
+
+&FUN`MAKEWIKI`TEXTCOLOR [u(cobj,sglob)]=|TextColor=#c1c1c1
+
+&FUN`MAKEWIKI`THEME [u(cobj,sglob)]=|Theme=[first(extract(get(*%0/V`THEME),3,1,±))]
+
+&FUN`MAKEWIKI`WEAKNESSES [u(cobj,sglob)]=|Weaknesses=[iter({[sql(u(Q`MAKEWIKI`SELECT`WEAKNESSES,%1),±,|)]},<span style="color:#EE204D">'''[u(capnames,first({##},|))]'''</span>%r<br>%r[edit(last({##},|),%r,<br>%r)],±,%r<br>%r)]
+
+&FUN`MAKEWIKI`WEIGHT [u(cobj,sglob)]=|Weight=[get(*%0/D`FINGER`WEIGHT)]
+
+&HELP`MAKEWIKI [u(cobj,sglob)]=The MakeWiki command outputs a character's finger and sheet information to the screen in a format for cut and pasting into the wiki to create a new character page.%R%R[ansi(ch,Command:)]%R%b%b%b%b%b+makewiki <name>%R%R%RQuotes from +finger may run long and need hand editing.%R%RDate of Birth (DOB) from +finger must be in the format 12 January 2002 for calculated ages to be set.%R%RAvoid overwriting a user's gallery.%r%rGroups whose wiki page name differs from the game's name will be translated automatically. The list to translate is hardcoded amongst other code in the FUN`MAKEWIKI`GROUPS and FUN`MAKEWIKI`CATEGORIES attributes, and will need editing if other mismatches are added.
+
+&Q`MAKEWIKI`SELECT`ABILITIES [u(cobj,sglob)]=select field_name, field_text from vol_field vf join vol_entity ve on (vf.entity_id = ve.entity_id and ve.entity_name = '%0') where field_type = 101
+
+&Q`MAKEWIKI`SELECT`CHARID [u(cobj,sglob)]=select entity_id from vol_entity where entity_name = '[sqlescape(%0)]' and entity_type=1
+
+&Q`MAKEWIKI`SELECT`DESCRIPTION [u(cobj,sglob)]=select field_name, field_text from vol_field vf join vol_entity ve on (vf.entity_id = ve.entity_id and ve.entity_name = '%0' and entity_type=1) where field_name like 'Desc%%' and field_type = 103
+
+&Q`MAKEWIKI`SELECT`GENOTHER [u(cobj,sglob)]=select field_name from vol_field vf join vol_entity ve on (vf.entity_id = ve.entity_id and ve.entity_name = '%0' and entity_type=1) where field_name not like 'Hist%%' and field_name not like 'Pers%%' and field_name not like 'Desc%%' and field_type = 103
+
+&Q`MAKEWIKI`SELECT`GROUPS [u(cobj,sglob)]=select vg.group_name from volv_group vg join vol_group_member vgm on (vgm.group_id = vg.group_id) join vol_entity ve on (vgm.character_id = ve.entity_id and entity_type = 1 and entity_name = '%0') where vg.group_is_private = 0 and vg.group_parent is null
+
+&Q`MAKEWIKI`SELECT`HISTORY [u(cobj,sglob)]=select field_name, field_text from vol_field vf join vol_entity ve on (vf.entity_id = ve.entity_id and ve.entity_name = '%0' and entity_type=1) where field_name like 'Hist%%' and field_type = 103
+
+&Q`MAKEWIKI`SELECT`PERSONALITY [u(cobj,sglob)]=select field_name, field_text from vol_field vf join vol_entity ve on (vf.entity_id = ve.entity_id and ve.entity_name = '%0' and entity_type=1) where field_name like 'Pers%%' and field_type = 103
+
+&Q`MAKEWIKI`SELECT`RESOURCES [u(cobj,sglob)]=select field_name, field_text from vol_field vf join vol_entity ve on (vf.entity_id = ve.entity_id and ve.entity_name = '%0' and entity_type=1) where field_type = 105
+
+&Q`MAKEWIKI`SELECT`SKILLS [u(cobj,sglob)]=select field_name, field_text from vol_field vf join vol_entity ve on (vf.entity_id = ve.entity_id and ve.entity_name = '%0' and entity_type=1) where field_type = 107
+
+&Q`MAKEWIKI`SELECT`WEAKNESSES [u(cobj,sglob)]=select field_name, field_text from vol_field vf join vol_entity ve on (vf.entity_id = ve.entity_id and ve.entity_name = '%0' and entity_type=1) where field_type = 109
