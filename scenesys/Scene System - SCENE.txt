@@ -86,7 +86,7 @@ th u(NEWCOBJ,Scene Management System <SCENE>,scene,,,,WIZARD SAFE !NO_COMMAND,IN
 
 &INC`LOG`COLORS [u(Cobj,scene)]=@attach %!/INC`COLOR=%0,%1
 
-@aconnect [u(Cobj,scene)]=@select/inline u(op,SCENESYS,UPCOMING)=1,{@attach %!/CMD`SCENES_UPCOMING}
+@aconnect [u(Cobj,scene)]=@stop u(isguest,%@);@select/inline u(op,SCENESYS,UPCOMING)=1,{@attach %!/CMD`SCENES_UPCOMING}
 
 &CMD`SCENES_UPCOMING [u(cobj,scene)]=$+upcoming:@select/inline t(u(setr,scenes,u(mysql3,GET`UPCOMING`SCENES)))=1,{@attach %!/INC`MSG=Scenes happening within 24 hours: [iter(%q<scenes>,u(pueblize,elements(%i0,1,chr(177)): '[elements(%i0,2,chr(177))]' \([u(fancytime,elements(%i0,3,chr(177)),%#)]\),+log [elements(%i0,1,chr(177))]),chr(176),\,%b)],%0},0,{@attach %!/INC`MSG=No scenes are happening in the next 24 hours. Bummer!,%0}
 
