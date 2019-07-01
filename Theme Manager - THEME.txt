@@ -10,7 +10,7 @@ th u(NEWCOBJ,Theme Database <THEMEDB>,themedb,u(cobj,theme),,1,SAFE,SAFE)
 &CMD`+FCLIST`MAIN [u(cobj,theme)]=th u(setq,com,lcstr(+%1));@attach %!/INC`GETSWITCH=%2;@attach %!/INC`[u(strfirstof,%q<switch>,MAIN)]=%3,%4
 @set [u(cobj,theme)]/CMD`+FCLIST`[u(choosegame,RHOSTMUSH,PENNMUSH)]=no_command
 
-&SWITCHES`PLAYER [u(cobj,theme)]=INFO|SEARCH
+&SWITCHES`PLAYER [u(cobj,theme)]=INFO|SEARCH|OPEN
 &SWITCHES`ADMIN [u(cobj,theme)]=CREATE|RENAME|DELETE|ASSIGN|REMOVE|DESCRIBE|STATUS|SETINFO|CLEARINFO|UNASSIGNED
 &SWITCHES`WIZARD [u(cobj,theme)]=CONFIG
 
@@ -18,7 +18,21 @@ th u(NEWCOBJ,Theme Database <THEMEDB>,themedb,u(cobj,theme),,1,SAFE,SAFE)
 
 &INC`MAIN [u(cobj,theme)]=@select/inline strlen(%0)=>0,{@attach %!/INC`DISPLAY},0,{@attach %!/INC`LISTALL}
 
-&INC`LISTALL [u(cobj,theme)]=@check u(setr,count,u(mysql,SELECT`THEMECOUNT))=@attach %!/INC`MSG=No inhabited themes to display.;@pemit %#=u(HEADER,mudname() - All Themes);@dolist/inline lnum(1,u(setr,pages,add(1,div(%q<count>,30))))={@pemit %#=u(table,iter(u(mysql3,SELECT`THEME_NAMES,mul(30,sub(u(choosegame,%i0,%d0),1))),u(pueblize,%i0,+fclist %i0),chr(176),chr(176)),37,u(width,%#),chr(176))};@pemit %#=u(footer)
+&INC`LISTALL [u(cobj,theme)]=@check u(setr,count,u(mysql,SELECT`THEMECOUNT))=@attach %!/INC`MSG=No inhabited themes to display.;@pemit %#=u(HEADER,mudname() - All Themes);@dolist/inline lnum(1,u(setr,pages,add(1,div(%q<count>,30))))={@pemit %#=u(table,iter(u(mysql3,SELECT`THEME_NAMES,mul(30,sub(u(choosegame,%i0,%d0),1))),u(pueblize,%i0,+fclist %i0),chr(176),chr(176)),37,u(width,%#),chr(176))};@pemit %#=%r[u(FOOTER,Additional commands)]%r[u(HLP`FCLIST`SHORT)]%r[u(FOOTER)]
+
+&INC`CASTLIST`OPEN [ucobj,theme]=@select/inline t(%1)=0,{@pemit %#=u(FUN`CASTCOLUMN);@pemit %#=u(separator)};@dolist/inline/delimit [chr(176)] [u(mysql3,SELECT`CAST`OPEN,%0)]={@pemit %#=u(FUN`CASTROW,u(choosegame,%i0,%d0))}
+
+&Q`SELECT`CAST`OPEN [ucobj,theme]=SELECT character_objid,tmember_type,character_status FROM volv_theme_member WHERE theme_id=? and character_status='Open' ORDER BY character_name
+
+&INC`OPEN [ucobj,theme]=@select/inline strlen(%0)=>0,{@attach %!/INC`DISPLAY`OPEN},{@pemit %#=[u(HLP`FCLIST`SHORT)]}
+
+&INC`DISPLAY`OPEN [ucobj,theme]=@attach %!/INC`FINDTHEME=%0,1;@pemit %#=u(HEADER,Theme: %q<themename>);@pemit %#=u(mysql,SELECT`DESCRIPTION,%q<theme>);@pemit %#=u(separator,Cast);@attach %!/INC`CASTLIST`OPEN=%q<theme>;@attach %!/INC`INFOLIST=%q<theme>;@pemit %#=%r[u(FOOTER,Additional commands)]%r[u(HLP`FCLIST`PLUSHELP)]%r[u(footer,if(u(isadmin,%#),Theme ID: %q<theme>))]
+
+&HLP`FCLIST`PLUSHELP [ucobj,theme]=%rFor more commands viewing open characters, check [u(pueblize,{[ansi(h,+News Open Characters)]},+news open characters,+News Open Characters)].%r%b
+
+&HLP`FCLIST`SHORT [ucobj,theme]=%rMore commands for viewing character lists:%r%r%b[u(pueblize,{[ansi(h,+fclist)]},+fclist,+fclist)] [space(17)] - list of source themes \(Marvel 01 - General, etc\)%r%b[ansi(h,+fclist[space(6)]<source>)] [space(4)]- view all characters from source theme%r%b[ansi(h,+fclist/open <source>)] [space(4)]- view just open characters from source theme.%r%r%b[ansi(h,+<type>-<status>-<gender>)] - Types includes AFC, FC, DFC, EFC, SFC, and VFC%r[space(29)]Status includes Open, Claimed, and Approved%r%b%bI.e. +fc-open-male[space(9)]Gender is optional, but includes Male and Female%r[space(29)]See [u(pueblize,{[ansi(#FFcc33,+)][ansi(#f8f8ff,News Types)]},+news types,+News Types)] for more information%r%r%b[u(pueblize,{[ansi(#FFcc33,+)][ansi(#f8f8ff,News)]},+news,+News)][space(21)]- A wide variety of information on the game%r[space(29)]especially [u(pueblize,{[ansi(#FFcc33,+)][ansi(#f8f8ff,News Getting Characters)]},+news getting characters,+News Getting Characters)]%r%b
+
+&HLP`FCLIST`LONG [ucobj,theme]=%rHere are a number of commands helpful for locating Open characters to apply for. Some may also be used to identify Approved or Claimed characters.%r%r%b[u(pueblize,{[ansi(h,+fclist)]},+fclist,+fclist)] [space(17)] - list of source themes \(Marvel 01 - General, etc\)%r%b[ansi(h,+fclist[space(6)]<source>)] [space(4)]- view all characters from source theme%r%b[ansi(h,+fclist/open <source>)] [space(4)]- view just open characters from source theme.%r%r%b[ansi(h,+<type>-<status>-<gender>)] - Types includes AFC, FC, DFC, EFC, SFC, and VFC%r[space(29)]Status includes Open, Claimed, and Approved%r%b%bI.e. +fc-open-male[space(9)]Gender is optional, but includes Male and Female%r[space(29)]See [u(pueblize,{[ansi(#FFcc33,+)][ansi(#f8f8ff,News Types)]},+news types,+News Types)] for more information%r%r[u(pueblize,{[ansi(#FFcc33,+)][ansi(#f8f8ff,News)]},+news,+News)] contains a wide variety of information on the game. Some news files that are especially useful in starting the application process include:%r%r[u(pueblize,{[ansi(#FFcc33,+)][ansi(#f8f8ff,News Getting Characters)]},+news getting characters,+News Getting Characters)]%t[u(pueblize,{[ansi(#FFcc33,+)][ansi(#f8f8ff,News Types of Characters)]},+news types,+News Types of Characters)]%r[u(pueblize,{[ansi(#FFcc33,+)][ansi(#f8f8ff,News Pitching Characters)]},+news pitching,+News Pitching Characters)]%r%b
 
 &Q`SELECT`THEME_NAMES [u(cobj,theme)]=SELECT theme_name FROM volv_theme ORDER BY theme_name LIMIT 30 OFFSET ?
 
@@ -29,7 +43,7 @@ th u(NEWCOBJ,Theme Database <THEMEDB>,themedb,u(cobj,theme),,1,SAFE,SAFE)
 &Q`FIND`THEME [u(cobj,theme)]=SELECT theme_id,theme_name FROM volv_theme WHERE theme_name LIKE '!%' OR theme_id=? ORDER BY theme_name LIMIT 1
 &Q`FIND`THEME`EXACT [u(cobj,theme)]=SELECT theme_id,theme_name FROM volv_theme WHERE theme_name=? OR theme_id=?
 
-&INC`DISPLAY [u(cobj,theme)]=@attach %!/INC`FINDTHEME=%0,1;@pemit %#=u(HEADER,Theme: %q<themename>);@pemit %#=u(mysql,SELECT`DESCRIPTION,%q<theme>);@pemit %#=u(separator,Cast);@attach %!/INC`CASTLIST=%q<theme>;@attach %!/INC`INFOLIST=%q<theme>;@pemit %#=u(footer,if(u(isadmin,%#),Theme ID: %q<theme>))
+&INC`DISPLAY [u(cobj,theme)]=@attach %!/INC`FINDTHEME=%0,1;@pemit %#=u(HEADER,Theme: %q<themename>);@pemit %#=u(mysql,SELECT`DESCRIPTION,%q<theme>);@pemit %#=u(separator,Cast);@attach %!/INC`CASTLIST=%q<theme>;@attach %!/INC`INFOLIST=%q<theme>;@pemit %#=%r[u(FOOTER,Additional commands)]%r[u(HLP`FCLIST`PLUSHELP)]%r[u(footer,if(u(isadmin,%#),Theme ID: %q<theme>))]
 
 &Q`SELECT`DESCRIPTION [u(cobj,theme)]=SELECT theme_description FROM vol_theme WHERE theme_id=?
 
