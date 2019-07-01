@@ -1145,6 +1145,21 @@ CREATE OR REPLACE VIEW volv_plotlink AS
 	SELECT p.*,s.* FROM vol_plotlink AS pl LEFT JOIN volv_scene AS s ON s.scene_id=pl.scene_id LEFT JOIN volv_plot AS p ON p.plot_id=pl.plot_id
 	ORDER BY p.plot_id,s.scene_id;
 
+DROP PROCEDURE IF EXISTS volp_scene_owner_upd;
+DELIMITER $$
+CREATE PROCEDURE volp_scene_owner_upd(IN in_scene_id INT UNSIGNED, IN in_old_owner_id INT UNSIGNED, IN in_new_owner_id INT UNSIGNED)
+	BEGIN
+		DECLARE found_actor_id INT UNSIGNED;
+		SELECT actor_id INTO found_actor_id FROM volv_actor WHERE character_id=in_new_owner_id AND scene_id=in_scene_id;
+		IF found_actor_id IS NULL THEN
+			INSERT INTO vol_actor(character_id,scene_id) VALUES (in_new_owner_id,in_scene_id);
+			SET found_actor_id=LAST_INSERT_ID();
+		END IF;
+		UPDATE vol_actor set actor_type=0 where character_id=in_old_owner_id AND scene_id=in_scene_id;
+		UPDATE vol_actor set actor_type=2 where character_id=in_new_owner_id AND scene_id=in_scene_id;
+	END $$
+DELIMITER ;														 
+														 
 CREATE TABLE IF NOT EXISTS vol_scene_partner (
   scene_id INT UNSIGNED NOT NULL,
   partner_slot TINYINT UNSIGNED NOT NULL DEFAULT 0,
