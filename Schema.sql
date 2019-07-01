@@ -997,6 +997,8 @@ CREATE TABLE IF NOT EXISTS vol_plot (
 	plot_title VARCHAR(255) UNIQUE,
 	plot_pitch TEXT,
 	plot_pitch_render TEXT NULL,
+	plot_summary TEXT,
+	plot_summary_render TEXT NULL,	
 	plot_outcome TEXT NULL,
 	plot_outcome_render TEXT NULL,
 	plot_date_start DATETIME NULL DEFAULT NULL,
@@ -1021,17 +1023,17 @@ CREATE OR REPLACE VIEW volv_runner AS
 	SELECT r.runner_id,r.plot_id,r.runner_type,c.* FROM vol_runner as r LEFT JOIN volv_character AS c ON c.character_id=r.character_id;
 	
 CREATE OR REPLACE VIEW volv_plot AS
-	SELECT p.plot_id,p.plot_title,p.plot_pitch,p.plot_outcome,p.plot_date_start,UNIX_TIMESTAMP(p.plot_date_start) AS plot_date_start_secs,p.plot_date_end,UNIX_TIMESTAMP(p.plot_date_end) AS plot_date_end_secs,r.character_id AS owner_id,r.character_objid AS owner_objid,r.character_name AS owner_name FROM vol_plot AS p LEFT JOIN volv_runner AS r ON r.plot_id=p.plot_id AND r.runner_type=2 ORDER BY p.plot_id;
-	
+	SELECT p.plot_id,p.plot_title,p.plot_pitch,p.plot_summary,p.plot_outcome,p.plot_date_start,UNIX_TIMESTAMP(p.plot_date_start) AS plot_date_start_secs,p.plot_date_end,UNIX_TIMESTAMP(p.plot_date_end) AS plot_date_end_secs,r.runner_ids,r.runner_objids,r.runner_names FROM vol_plot AS p LEFT JOIN volv_runners AS r ON r.plot_id=p.plot_id ORDER BY p.plot_id;
+											       
 CREATE OR REPLACE VIEW volv_runners AS
-	SELECT plot_id,GROUP_CONCAT(character_objid ORDER BY character_name SEPARATOR ' ') AS runner_objids,GROUP_CONCAT(character_name ORDER BY character_name SEPARATOR '|') AS runner_names FROM volv_runner WHERE runner_type=2 GROUP BY plot_id;
+	SELECT plot_id,GROUP_CONCAT(character_id ORDER BY character_name SEPARATOR ' ') AS runner_ids,GROUP_CONCAT(character_objid ORDER BY character_name SEPARATOR ' ') AS runner_objids,GROUP_CONCAT(character_name ORDER BY character_name SEPARATOR '|') AS runner_names FROM volv_runner WHERE runner_type=2 GROUP BY plot_id;
 
 CREATE OR REPLACE VIEW volv_helpers AS
   SELECT plot_id,GROUP_CONCAT(character_objid ORDER BY character_name SEPARATOR ' ') AS helper_objids,GROUP_CONCAT(character_name ORDER BY character_name SEPARATOR '|') AS helper_names FROM volv_runner WHERE runner_type=1 GROUP BY plot_id;
 
 CREATE OR REPLACE VIEW volv_plot_agg AS
-	SELECT p.*,r.runner_objids,r.runner_names,h.helper_objids,h.helper_names FROM volv_plot AS p LEFT JOIN volv_runners AS r ON p.plot_id=r.plot_id LEFT JOIN volv_helpers AS h ON h.plot_id=p.plot_id;
-	
+	SELECT p.*,h.helper_objids,h.helper_names FROM volv_plot AS p LEFT JOIN volv_runners AS r ON p.plot_id=r.plot_id LEFT JOIN volv_helpers AS h ON h.plot_id=p.plot_id;
+											       
 CREATE TABLE IF NOT EXISTS vol_scene (
 	scene_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 	scene_title VARCHAR(255),
