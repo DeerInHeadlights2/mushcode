@@ -16,7 +16,7 @@ th u(NEWCOBJ,Volund's Board System <BBS>,bbs,,,,WIZARD SAFE !NO_COMMAND,INHERIT 
 &CMD`BBWRITE [u(cobj,bbs)]=$^(?s)\+bb(?\: +(.*))?$:th u(setq,sysname,ucstr(%1S));@attach %!/INIT;@attach %!/WRITE`MAIN=%1
 @set [u(cobj,bbs)]/CMD`BBWRITE=regexp
 
-@aconnect [u(cobj,bbs)]=@check cor(u(op,BBS,AUTOSCAN),u(op,BBS,AUTOBRIEF));@attach %!/CMD`BB`MAIN=+bblogin,login
+@aconnect [u(cobj,bbs)]=@stop u(isguest,%@);@check cor(u(op,BBS,AUTOSCAN),u(op,BBS,AUTOBRIEF));@attach %!/CMD`BB`MAIN=+bblogin,login
 
 &COMMANDS`PLAYER [u(cobj,bbs)]=INFO|READ|POST|REMOVE|MOVE|SCAN|NEXT|EDIT|WRITE|JOIN|LEAVE|LIST|PROOF|TOSS|CATCHUP|SEARCH|NEW|ALL|COMMENT|RIEF|BRIEF|ADMIN|OPTIONS|LOGIN
 &COMMANDS`ADMIN [u(cobj,bbs)]=
