@@ -7,10 +7,17 @@ th u(NEWCOBJ,Navigation System <NAVI>,navi,,,,WIZARD SAFE !NO_COMMAND,INHERIT SI
 
 &CMD`+SETHOME [u(cobj,navi)]=$+sethome:@stop u(isguest,%#)=@attach %!/INC`MSG=ERROR: Permission denied.;@check elock(%l/link,%#)=@attach %!/INC`MSG=You do not pass the link lock for this room.;@link %#=%l;@attach %!/INC`MSG=Home set to your current location.
 
+&SYSTEM`SWITCHES [u(cobj,navi)]=setunion(setunion(if(%q<mode>,v(SWITCHES`%q<mode>`PLAYER),v(SWITCHES`PLAYER)),if(u(isadmin,%#),v(SWITCHES`ADMIN)),|,|),if(u(iswizard,%#),v(SWITCHES`WIZARD)),|,|)
+&SWITCHES`ROOMLIST`PLAYER [u(cobj,navi)]=BRIEF
+
 &FUN`TELDISTS [u(cobj,navi)]=squish(iter(u(u(cobj,grid)/FUN`LISTDISTRICTS,u(strfirstof,%0,u(cobj,district))),if(elock(%i0/[u(choosegame,Teleport,Use)],u(strfirstof,%1,%#)),%i0)))
 
 &FUN`FINDROOM [u(cobj,navi)]=u(sortname,u(FUN`FINDROOM`%va,%0))
 &FUN`FINDROOM`PENNMUSH [u(cobj,navi)]=filterbool(#lambda/elock(\%0/teleport,%#),setunion(lsearch(all,type,room,name,%0,elock,D`GRID:1),lsearch(all,type,thing,name,%0,elock,PORT:>0)))
+
+&FUN`FINDDISTS [u(cobj,navi)]=lsearch(all,type,thing,elock,D`DISTRICT:>0,name,%0)
+&FUN`RECUR`LISTALLCHILDROOMS [u(cobj,navi)]=[iter(children(%0),switch(type(%i0),THING,u(FUN`RECUR`LISTALLCHILDROOMS,%i0),ROOM,%i0))]
+&FUN`ROOMSINMATCHINGDIST [u(cobj,navi)]=iter(u(FUN`FINDDISTS,%0),u(FUN`RECUR`LISTALLCHILDROOMS,%i0))
 
 &FUN`LISTROOMS [u(cobj,navi)]=squish(iter(u(FUN`TELDISTS,,%1),u(FUN`LISTDISTROOMS,%i0))%B[u(FUN`LISTTHINGS)])
 &FUN`LISTDISTROOMS [u(cobj,navi)]=u(sortname,u(u(cobj,grid)/filter,NOTDIST,children(%0)))
@@ -23,7 +30,7 @@ th u(NEWCOBJ,Navigation System <NAVI>,navi,,,,WIZARD SAFE !NO_COMMAND,INHERIT SI
 @set [u(cobj,navi)]/CMD`+NAVI`PENNMUSH=regexp
 &CMD`+NAVI`RHOSTMUSH [u(cobj,navi)]=$^(?\:\+)(go|roomlist|port)(?\:/(\\S+)?)?(?\: +(.+?))?(?\:=(.*))?$:@attach %!/CMD`+NAVI`MAIN
 @set [u(cobj,navi)]/CMD`+NAVI`RHOSTMUSH=regexp
-&CMD`+NAVI`MAIN [u(cobj,navi)]=@attach %!/INC`GETSWITCH=%2;@select/inline %q<switch>=CONFIG,{@attach %!/INC`CONFIG=%3,%4},{@attach %!/%1`[u(strfirstof,%q<switch>,MAIN)]=%3,%4}
+&CMD`+NAVI`MAIN [u(cobj,navi)]=th u(setq,mode,switch(%1,roomlist,roomlist,));@attach %!/INC`GETSWITCH=%2;@select/inline %q<switch>=CONFIG,{@attach %!/INC`CONFIG=%3,%4},{@attach %!/%1`[u(strfirstof,%q<switch>,MAIN)]=%3,%4}
 @set [u(cobj,navi)]/CMD`+NAVI`[u(choosegame,RHOSTMUSH,PENNMUSH)]=no_command
 
 &SYSTEM`NAME [u(cobj,navi)]=NAVI
@@ -44,7 +51,9 @@ th u(NEWCOBJ,Navigation System <NAVI>,navi,,,,WIZARD SAFE !NO_COMMAND,INHERIT SI
 
 &ROOMLIST`RECURSE [u(Cobj,navi)]=@dolist/inline u(FUN`TELDISTS,%0)={@select/inline words(u(setr,rooms,u(FUN`LISTDISTROOMS,u(choosegame,%i0,%d0))))=>0,{@pemit %#=u(SEPARATOR,u(u(cobj,grid)/FUN`CHAIN,u(choosegame,%i0,%d0)));th step(FUN`ROOMLIST,%q<rooms>,30)};@attach %!/ROOMLIST`RECURSE=u(choosegame,%i0,%d0)}
 
-&ROOMLIST`MAIN [u(cobj,navi)]=@select/inline strlen(%0)=>0,{think u(setq,l,u(FUN`FINDROOM)); @check strlen(u(setr,m,strfirstof(grab(%ql,%0),u(namegraball,%ql,%0))))=@pemit %#=Nothing matches '%0'.;@pemit %#=u(header,'%0');th step(FUN`ROOMLIST,%qm,10);@pemit %#=u(footer)},0,{@pemit %#=u(header,mudname() Grid Rooms);@attach %!/ROOMLIST`RECURSE=null();@select/inline words(u(setr,things,u(FUN`LISTTHINGS)))=>0,{@pemit %#=u(SEPARATOR,Player Things);th step(FUN`ROOMLIST,%q<things>,10)};@pemit %#=u(footer)}
+&ROOMLIST`MAIN [u(cobj,navi)]=@select/inline strlen(%0)=>0,{think u(setq,l,u(FUN`FINDROOM));@check or(strlen(setr(drooms,u(FUN`ROOMSINMATCHINGDIST,%0))),strlen(u(setr,m,strfirstof(grab(%ql,%0),u(namegraball,%ql,%0)))))=@pemit %#=Nothing matches '%0'.;@pemit %#=u(header,'%0');th [setq(rfinal,setunion(%qm,%q<drooms>))][setq(dfinal,setunion(%q<dlist>,iter(%qm,parent(%i0))))][setq(dlist,iter(%q<rfinal>,parent(%i0)))][setq(dlist,setunion(%q<dlist>,%q<dlist>))][setq(dlist2,sortkey(u(cobj,grid)/FUN`CHAIN,%q<dlist>))];@dolist/inline %q<dlist2>={@pemit %#=u(SEPARATOR,u(u(cobj,grid)/FUN`CHAIN,u(choosegame,%i0,%d0))); th step(FUN`ROOMLIST,sort(setinter(children(%i0),%q<rfinal>),name),10)};@pemit %#=u(footer)},0,{@pemit %#=u(header,mudname() Grid Rooms);@attach %!/ROOMLIST`RECURSE=null();@select/inline words(u(setr,things,u(FUN`LISTTHINGS)))=>0,{@pemit %#=u(SEPARATOR,Player Things);th step(FUN`ROOMLIST,%q<things>,10)};@pemit %#=u(footer)}
+
+&ROOMLIST`BRIEF [u(cobj,navi)]=@select/inline strlen(%0)=>0,{think u(setq,l,u(FUN`FINDROOM)); @check strlen(u(setr,m,strfirstof(grab(%ql,%0),u(namegraball,%ql,%0))))=@pemit %#=Nothing matches '%0'.;@pemit %#=u(header,'%0');th step(FUN`ROOMLIST,%qm,10);@pemit %#=u(footer)},0,{@pemit %#=u(header,mudname() Grid Rooms);@attach %!/ROOMLIST`RECURSE=null();@select/inline words(u(setr,things,u(FUN`LISTTHINGS)))=>0,{@pemit %#=u(SEPARATOR,Player Things);th step(FUN`ROOMLIST,%q<things>,10)};@pemit %#=u(footer)}
 
 &FUN`ROOMLIST [u(cobj,navi)]=pemit(%#,u(table,iter(lnum(0,sub(%+,1)),ljust(ansi(c,u(pueblize,v(%i0),+port [v(%i0)])),6) [ansi(hx,u(pueblize,name(v(%i0)),+port [v(%i0)]))],%b,|),38,u(width,%#),|))
 
@@ -57,5 +66,5 @@ th u(NEWCOBJ,Navigation System <NAVI>,navi,,,,WIZARD SAFE !NO_COMMAND,INHERIT SI
 &ROOMLIST`CONFIG [u(cobj,navi)]=@attach %!/INC`CONFIG
 &PORT`CONFIG [u(cobj,navi)]=@attach %!/INC`CONFIG
 
-&HLP`NAVI [u(cobj,navi)]=The Grid system is a series of commands that make it easy to navigate the IC rooms, or 'Grid.'%R%R[ansi(hc,Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+roomlist)] - List all IC rooms in the game that you can +port to.%R[ansi(h,+roomlist <search>)] - List all rooms partially matching the entered text.%R[ansi(h,+port <name or dbref>)] - Teleport to a room.%R[ansi(h,+sethome)] - Set the current location as your 'home.'%R[ansi(h,+gohome)] or [ansi(h,home)] - Teleport to your home.%R%R[ansi(h,+go ooc)] - Teleport to the OOC nexus.%R[ansi(h,+go ic)] - Teleport to the IC nexus.)]%R%RPlayers using THINGS as hangouts can make that object a valid +port destination by setting its PORT attribute to 1. use &PORT here=1 while within the object to set it.[u(choosegame,%RPENNMUSH: You must also set @lock/teleport here=#TRUE - Penn users can use @lock/teleport to restrict who can access the object with +port.)]
+&HLP`NAVI [u(cobj,navi)]=The Grid system is a series of commands that make it easy to navigate the IC rooms, or 'Grid.'%R%R[ansi(hc,Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+roomlist)] - List all IC rooms in the game that you can +port to.%R[ansi(h,+roomlist <search>)] - List all rooms with a room or parent name partially matching the entered text.%R[ansi(h,+roomlist/brief <search>)] - List all rooms with a room name partially matching the entered text.%R[ansi(h,+port <name or dbref>)] - Teleport to a room.%R[ansi(h,+sethome)] - Set the current location as your 'home.'%R[ansi(h,+gohome)] or [ansi(h,home)] - Teleport to your home.)]%R%RPlayers using THINGS as hangouts can make that object a valid +port destination by setting its PORT attribute to 1. use &PORT here=1 while within the object to set it.[u(choosegame,%RPENNMUSH: You must also set @lock/teleport here=#TRUE - Penn users can use @lock/teleport to restrict who can access the object with +port.)]
 +help/add Navigation/+port=[u(cobj,navi)]/HLP`NAVI
