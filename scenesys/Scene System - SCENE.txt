@@ -317,7 +317,7 @@ th u(NEWCOBJ,Scene Management System <SCENE>,scene,,,,WIZARD SAFE !NO_COMMAND,IN
 
 &INC`LOG`DETAILS`REPORTS [u(cobj,scene)]=@select/inline strlen(%q<reports>)=>0,{@pemit %#=u(SUBHEADER,Reports Featuring this Scene);@dolist/inline/delimit [chr(176)] %q<plots>={@pemit %#=align(4 20 10 10 15 7,u(pueblize,elements(%i0,1,chr(177)),+rread [elements(%i0,1,chr(177))]),u(pueblize,elements(%i0,2,chr(177)),+rread [elements(%i0,1,chr(177))]),if(elements(%i0,5,chr(177)),u(fancytime,elements(%i0,5,chr(177)),%#),N/A),if(elements(%i0,6,chr(177)),u(fancytime,elements(%i0,6,chr(177)),%#),N/A),if(isobjid(elements(%i0,8,chr(177))),u(getproperty,elements(%i0,8,chr(177)),banner),ansi(hx,elements(%i0,9,chr(177)))),elements(%i0,4,chr(177)))}}
 
-&INC`LOG`DETAILS`PLOTS [u(cobj,scene)]=@select/inline strlen(%q<plots>)=>0,{@pemit %#=u(SUBHEADER,Plots Featuring this Scene);@dolist/inline/delimit [chr(176)] %q<plots>={@pemit %#=align(4 20 10 10 15 7,u(pueblize,elements(%i0,1,chr(177)),+log [elements(%i0,1,chr(177))]),u(pueblize,elements(%i0,2,chr(177)),+log [elements(%i0,1,chr(177))]),if(elements(%i0,5,chr(177)),u(fancytime,elements(%i0,5,chr(177)),%#),N/A),if(elements(%i0,6,chr(177)),u(fancytime,elements(%i0,6,chr(177)),%#),N/A),if(isobjid(elements(%i0,8,chr(177))),u(getmoniker,elements(%i0,8,chr(177))),ansi(hx,elements(%i0,9,chr(177)))),elements(%i0,4,chr(177)))}}
+&INC`LOG`DETAILS`PLOTS [u(cobj,scene)]=@select/inline strlen(%q<plots>)=>0,{@pemit %#=u(SUBHEADER,Plots Featuring this Scene)%r[ansi(u(color,%#,COLUMN_NAMES),align(4 30 20 10 10,ID,Title,Owner,Start,End))];@dolist/inline/delimit [chr(176)] %q<plots>={@pemit %#=align(4 30 20 10 10,u(pueblize,elements(%i0,1,chr(177)),+log [elements(%i0,1,chr(177))]),u(pueblize,elements(%i0,2,chr(177)),+log [elements(%i0,1,chr(177))]),if(isobjid(elements(%i0,6,chr(177))),u(getmoniker,elements(%i0,6,chr(177))),ansi(hx,elements(%i0,9,chr(177)))),if(elements(%i0,3,chr(177)),u(fancytime,elements(%i0,3,chr(177)),%#),N/A),if(elements(%i0,4,chr(177)),u(fancytime,elements(%i0,4,chr(177)),%#),N/A))}}
 
 &INC`LOG`WHO [u(cobj,scene)]=@attach %!/INC`VALID`SCENE=u(strfirstof,%0,get(%#/D`SCENE));@attach %!/INC`MSG=Joined participants for Scene %q<scene>: [u(strfirstof,u(itemize,iter(lsearch(all,type,player,elock,D`SCENE:%q<scene>),name(%i0)[if(strmatch(%l,loc(%i0)),,%b\(not present\))],%b,|),|,and,\,),Nobody!)]
 
@@ -367,7 +367,7 @@ th u(NEWCOBJ,Scene Management System <SCENE>,scene,,,,WIZARD SAFE !NO_COMMAND,IN
 
 @@ PLOT SECTION
 
-&SWITCHES`PLOT`PLAYER [u(cobj,scene)]=OLD|LINK|UNLINK|GRANT|REVOKE|PITCH|OUTCOME|START|END|SCENES
+&SWITCHES`PLOT`PLAYER [u(cobj,scene)]=OLD|LINK|UNLINK|GRANT|REVOKE|PITCH|OUTCOME|START|END|SUMMARY
 &SWITCHES`PLOT`ADMIN [u(cobj,scene)]=CREATE|TITLE|ADDRUNNER|REMRUNNER|DELETE
 
 &INC`PLOT`MAIN [u(cobj,scene)]=@select/inline gt(strlen(%0),0)=1,{@attach %!/INC`PLOT`DETAILS},0,{@attach %!/INC`PLOT`LIST}
@@ -376,13 +376,15 @@ th u(NEWCOBJ,Scene Management System <SCENE>,scene,,,,WIZARD SAFE !NO_COMMAND,IN
 
 &INC`PLOT`LIST [u(cobj,scene)]=@pemit %#=u(HEADER,if(%1,Old,Current) Plots);@pemit %#=ansi(u(color,%#,COLUMN_NAMES),align(4 25 20 26,ID,Title,Runners,Pitch));@pemit %#=u(separator);@dolist/inline/delimit [chr(176)] [u(mysql3,GET`[if(%1,ALLPLOTS,RUNNINGPLOTS)])]={@pemit %#=ansi(if(mod(inum(0),2),u(color,%#,ROW_A),u(color,%#,ROW_B)),u(FUN`FORMATPLOT,u(choosegame,%i0,%d0)))};@pemit %#=u(footer)
 
+&fancytime4 [u(cobj,ccp)]=u(fancybase,%0,%1,$b $d $Y)
+
 &INC`PLOT`SCENELIST [u(cobj,scene)]=@attach %!/INC`FINDPLOT=%0;th u(setq,total,u(mysql,COUNT`PLOTSCENE,%q<pl1id>));th u(setq,page,bound(%q<page>,1,u(setr,max,firstof(ceil(fdiv(%q<total>,30)),1))));th u(setq,offset,mul(30,sub(%q<page>,1)));@pemit %#=ansi(u(color,%#,COLUMN_NAMES),align(4 41 19 11,ID,Title,Owner,if(%3,Date,Status/End date)));@pemit %#=u(SEPARATOR);@dolist/inline/delimit [chr(176)] [u(mysql3,LOAD`PLOT_SCENES,%q<pl1id>,%q<offset>)]={@pemit %#=align(4 41 19 11,u(pueblize,elements(%i0,1,chr(177)),+log [elements(%i0,1,chr(177))]),elements(%i0,2,chr(177)),if(isobjid(elements(%i0,3,chr(177))),u(getmoniker,elements(%i0,3,chr(177))),ansi(hx,elements(%i0,3,chr(177)))),if(%3,u(choosegame,timefmt($m/$d/$y,elements(%i0,7,chr(177)),u(gettz,%#)),ptimefmt($m/$d/$y,elements(%i0,7,chr(177)),u(gettz,%#))),switch(elements(%i0,4,chr(177)),0,Active,1,Paused,2,Scheduled,3,u(fancytime4,elements(%i0,5,chr(177))),???)))};
 
 &Q`GET`ALLPLOTS [u(cobj,scene)]=SELECT plot_id,plot_title,runner_names,helper_names,plot_date_start_secs,plot_date_end_secs,LEFT(plot_pitch,30) FROM volv_plot_agg WHERE plot_date_end IS NOT NULL AND plot_date_end<NOW();
 
 &Q`GET`RUNNINGPLOTS [u(cobj,scene)]=SELECT plot_id,plot_title,runner_names,helper_names,plot_date_start_secs,plot_date_end_secs,LEFT(plot_pitch,30) FROM volv_plot_agg WHERE plot_date_end IS NULL OR plot_date_end>NOW();
 
-&FUN`FORMATPLOT [u(cobj,scene)]=align(4 25 20 26,u(pueblize,elements(%0,1,chr(177)),+plot [elements(%0,1,chr(177))]),elements(%0,2,chr(177)),iter(elements(%0,3,chr(177)),%i0,|,\,%b)[if(strlen(elements(%0,4,chr(177))),%b+[iter(elements(%0,4,chr(177)),%i0,|,\,%b)])],elements(%0,7,chr(177)))
+&FUN`FORMATPLOT [u(cobj,scene)]=align(4 25 20 26,u(pueblize,elements(%0,1,chr(177)),+plot [elements(%0,1,chr(177))]),elements(%0,2,chr(177)),iter(elements(%0,3,chr(177)),%i0,|,\,%b),elements(%0,7,chr(177)))
 
 &INC`VALID`PLOTNAME [u(cobj,scene)]=@check strlen(u(setr,title,trim(stripansi(%0))))=@attach %!/INC`MSG=ERROR: Plots must have titles!;@stop cand(u(setr,exist_id,u(mysql,PLOT`TITLE_MATCH,%q<title>)),neq(%1,%q<exist_id>))=@attach %!/INC`MSG=ERROR: That title is not unique. Another Plot already uses it!
 
@@ -391,17 +393,23 @@ th u(NEWCOBJ,Scene Management System <SCENE>,scene,,,,WIZARD SAFE !NO_COMMAND,IN
 &Q`PLOT`TITLE_MATCH [u(Cobj,scene)]=SELECT plot_id FROM vol_plot WHERE plot_title=? LIMIT 1
 &Q`PLOT`TITLE_WILD [u(Cobj,scene)]=SELECT plot_id FROM vol_plot WHERE plot_title LIKE '!%' ORDER BY plot_title LIMIT 1
 
-&INC`LOADPLOT [u(cobj,scene)]=th u(setq,pldata,u(mysql3,LOAD`PLOT,%0));th iter(id title pitch outcome start end runnerobjids runnernames helperobjids helpernames,u(setq,pl%1%i0,elements(%q<pldata>,inum(0),chr(177))))
+&INC`LOADPLOT [u(cobj,scene)]=th u(setq,pldata,u(mysql3,LOAD`PLOT,%0));th iter(id title pitch outcome start end runnerobjids runnernames helperobjids helpernames summary,u(setq,pl%1%i0,elements(%q<pldata>,inum(0),chr(177))))
 
-&Q`LOAD`PLOT [u(cobj,scene)]=SELECT plot_id,plot_title,plot_pitch,plot_outcome,plot_date_start_secs,plot_date_end_secs,runner_objids,runner_names,helper_objids,helper_names FROM volv_plot_agg WHERE plot_id=?
+&INC`PLOT`SUMMARY [u(cobj,scene)]=@attach %!/INC`FINDPLOT=%0;@check cor(u(isadmin,%#),match(%q<pl1runnerobjids>,%:))=@attach %!/INC`MSG=ERROR: Permission denied.;@check strlen(%1)=@attach %!/INC`MSG=The new Summary field is empty!;@attach %!/INC`DOSQL=SET`PLOTSUMMARY,%1,%q<pl1id>;@attach %!/INC`DOSQL=SET`PLOT_SUMMARY_RENDER,u(render,%1),%q<pl1id>;@attach %!/INC`MSG=The Plot Summary was changed.
+
+&Q`LOAD`PLOT [u(cobj,scene)]=SELECT plot_id,plot_title,plot_pitch,plot_outcome,plot_date_start_secs,plot_date_end_secs,runner_objids,runner_names,helper_objids,helper_names,plot_summary FROM volv_plot_agg WHERE plot_id=?
+
+&Q`SET`PLOTSUMMARY [u(cobj,scene)]=UPDATE vol_plot SET plot_summary=? WHERE plot_id=?
+
+&Q`SET`PLOT_SUMMARY_RENDER [u(cobj,scene)]=UPDATE vol_plot SET plot_summary_render=? WHERE plot_id=?
 
 &Q`GET`PLOTCHECK [u(cobj,scene)]=SELECT plot_id FROM vol_plot WHERE plot_id=?
 
 &Q`COUNT`PLOTSCENE [u(cobj,scene)]=SELECT count(scene_id) FROM volv_plotlink where plot_id=?
 
-&Q`LOAD`PLOT_SCENES [u(cobj,scene)]=SELECT scene_id,scene_title,runner_name,scene_status FROM volv_plotlink WHERE plot_id=? ORDER BY scene_id DESC LIMIT 30 OFFSET ?
+&Q`LOAD`PLOT_SCENES [u(cobj,scene)]=SELECT scene_id,scene_title,runner_name,scene_status,scene_date_finished_secs FROM volv_plotlink WHERE plot_id=? ORDER BY scene_id DESC LIMIT 30 OFFSET ?
 
-&INC`PLOT`DETAILS [u(cobj,scene)]=@attach %!/INC`FINDPLOT=%0;@pemit %#=u(HEADER,Plot ID %q<pl1id>: %q<pl1title>);@pemit %#=[ansi(h,Runners:)]%b[iter(%q<pl1runnerobjids>,u(getmoniker,%i0),%b,\,%b)]%R[ansi(h,Helpers:)]%b[iter(%q<pl1helperobjids>,u(getmoniker,%i0),%b,\,%b)]%R[ansi(h,Schedule:)] [u(fancytime,%q<pl1start>)] to [u(fancytime,%q<pl1end>)];@pemit %#=ansi(h,Pitch:) %q<pl1pitch>;@pemit %#=ansi(h,Outcome:) %q<pl1outcome>;@pemit %#=u(separator,Scenes);@attach %!/INC`PLOT`SCENELIST;@pemit %#=u(FOOTER,if(gt(%q<page>,1),ansi(hg,u(pueblize,<,+plot[if(%3,/old)]/[sub(%q<page>,1)] %q<pl1id>)),ansi(hx,<))%BPage %q<page> of [bound(%q<max>,1)]%B[if(lt(%q<page>,%q<max>),ansi(hg,u(pueblize,>,+plot[if(%3,/old)]/[add(%q<page>,1)] %q<pl1id>)),ansi(hx,>))])
+&INC`PLOT`DETAILS [u(cobj,scene)]=@attach %!/INC`FINDPLOT=%0;@pemit %#=u(HEADER,Plot ID %q<pl1id>: %q<pl1title>);@pemit %#=[ansi(h,Runners:)]%b[iter(%q<pl1runnerobjids>,u(getmoniker,%i0),%b,\,%b)]%R[ansi(h,Helpers:)]%b[iter(%q<pl1helperobjids>,u(getmoniker,%i0),%b,\,%b)]%R[ansi(h,Schedule:)] [u(fancytime,%q<pl1start>)] to [u(fancytime,%q<pl1end>)];@pemit %#=ansi(h,Pitch:) %q<pl1pitch>;@pemit %#=ansi(h,Summary:) %q<pl1summary>;@pemit %#=ansi(h,Outcome:) %q<pl1outcome>;@pemit %#=u(separator,Scenes);@attach %!/INC`PLOT`SCENELIST;@pemit %#=u(FOOTER,if(gt(%q<page>,1),ansi(hg,u(pueblize,<,+plot[if(%3,/old)]/[sub(%q<page>,1)] %q<pl1id>)),ansi(hx,<))%BPage %q<page> of [bound(%q<max>,1)]%B[if(lt(%q<page>,%q<max>),ansi(hg,u(pueblize,>,+plot[if(%3,/old)]/[add(%q<page>,1)] %q<pl1id>)),ansi(hx,>))])
 
 &INC`PLOT`CREATE [u(cobj,scene)]=@attach %!/INC`VALID`PLOTNAME=%0;@check strlen(%1)=@attach %!/INC`MSG=ERROR: The Plot needs a Pitch!;@attach %!/INC`DOSQL=NEW`PLOT,%q<title>,%1;@attach %!/INC`DOSQL=SET`PLOT_PITCH_RENDER,u(render,%1),%q<plot_id>;@attach %!/INC`MSG=Plot %q<plot_id>: '%q<title>' added!
 
@@ -480,8 +488,7 @@ th u(NEWCOBJ,Scene Management System <SCENE>,scene,,,,WIZARD SAFE !NO_COMMAND,IN
 &HLP`+PARTNERS [u(cobj,scene)]=The Partners system helps keep track of matchups within scenes. Examples include a task force, a dogfight, a duel. The idea is that this will help participants of large scenes and scenerunners easily keep track of who is grouped together, who is fighting who, etc.%R%R[ansi(hc,Commands)]%RThese commands use the currently joined scene contextually. In other words, each list of matchups is unique-per-+scene.%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+partners)] - List all matchups in the scene.%R[ansi(h,+partners/join <slot>)] - Join a particular matchup. <slot> must be a number 1-15.%R[ansi(h,+partners/leave)] - Leaves your matchup.)]
 +help/add Roleplaying/+partners=[u(cobj,scene)]/HLP`+PARTNERS
 
-&HLP`+PLOT [u(cobj,scene)]=SceneSys is a scene scheduling, tracking, and logging tool that works alongside [mudname()]'s Wiki. The original version was designed by Mercutio @ M*U*S*H and some of his code remains - credits are due.%R[ansi(hc,See Also:)] [u(pueblize,+help +scene,+help +scene)]%R%R[ansi(hc,Display Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+plot)] - Show all current plots.%R[ansi(h,+plot/old)] - Show all plots in the system.%R[ansi(h,+plot <id>)] - Show a plot's details.)]%R%R[ansi(hc,Runner Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+plot/pitch <id>=<text>)] - Change a Plot's Pitch.%R[ansi(h,+plot/outcome <id>=<text>)] - Change a Plot's Outcome.%R[ansi(h,+plot/start <id>=<time>)] - Change a Plot's Start Date. +help Validators%R[ansi(h,+plot/end <id>=<time>)] - Change a Plot's End Date. When this date passes it will display only in +plot/old! To remove the End Date set it to 0.%R[ansi(h,+plot/grant <id>=<character>)] - Grant Helper status to another character.%R[ansi(h,+plot/revoke <id>=<character>)] - Removed granted Helper status.)]%R%R[ansi(hc,Helper Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+plot/link <id>=<scene>)] - Links a Scene to a Plot. Scenes can belong to more than one plot!%R[ansi(h,+plot/unlink <id>=<scene>)] - Removes a linked scene.)]
-+help/add Roleplaying/+plot=[u(cobj,scene)]/HLP`+PLOT
+&HLP`+PLOT [u(cobj,scene)]=SceneSys is a scene scheduling, tracking, and logging tool that works alongside [mudname()]'s Wiki. The original version was designed by Mercutio @ M*U*S*H and some of his code remains - credits are due.%R[ansi(hc,See Also:)] [u(pueblize,+help +scene,+help +scene)]%R%R[ansi(hc,New Plot Ideas)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+request/event <subject>=<pitch>)] - Create a job with a plot idea.)]%R%R[ansi(hc,Display Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+plot)] - Show all current plots.%R[ansi(h,+plot/old)] - Show all plots in the system.%R[ansi(h,+plot <id>)] - Show a plot's details.)]%R%R[ansi(hc,Runner Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+plot/pitch <id>=<text>)] - Change a Plot's Pitch.%R[ansi(h,+plot/summary <id>=<text>)] - Change a Plot's Summary.%R[ansi(h,+plot/outcome <id>=<text>)] - Change a Plot's Outcome.%R[ansi(h,+plot/start <id>=<time>)] - Change a Plot's Start Date. +help Validators%R[ansi(h,+plot/end <id>=<time>)] - Change a Plot's End Date. When this date passes it will display only in +plot/old! To remove the End Date set it to 0.%R[ansi(h,+plot/grant <id>=<character>)] - Grant Helper status to another character.%R[ansi(h,+plot/revoke <id>=<character>)] - Removed granted Helper status.)]%R%R[ansi(hc,Helper Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+plot/link <id>=<scene>)] - Links a Scene to a Plot. Scenes can belong to more than one plot!%R[ansi(h,+plot/unlink <id>=<scene>)] - Removes a linked scene.)]
 
 &SHLP`+PLOT [u(cobj,scene)]=[ansi(hc,Administrator Commands)]%R[align(5 [sub(u(width,%#),6)],,[ansi(h,+plot/create <title>=<pitch>)] - Creates a new plot.%R[ansi(h,+plot/addrunner <id>=<character>)] - Give someone Runner status.%R[ansi(h,+plot/remrunner <id>=<character>)] - Remove runner status.%R[ansi(h,+plot/title <id>=<title>)] - Change a plot's title.%R[ansi(h,+plot/delete <id>=<title>)] - Delete a plot.)]
 +shelp/add Roleplaying/+plot=[u(cobj,scene)]/SHLP`+PLOT
