@@ -10,6 +10,12 @@ th u(NEWCOBJ,District Parent <DISTRICT>,district,u(cobj,grid),u(cobj,ancestor_ro
 &FUN`ENTER [u(cobj,district)]=vol_approved(%#)
 &FUN`TELEPORT [u(cobj,district)]=vol_approved(%#)
 
+
+&FUN`CHAIN`DISPLAY [u(cobj,grid)]=iter(u(filter,ISDISTDISPLAY,revwords(lparent(%0))),u(getmoniker,%i0),%b,if(%1,/,%B-%B))
+&FIL`ISDISTDISPLAY [u(cobj,grid)]=cand(hastype(%0,THING),get(%0/D`DISTRICT),not(match(u(conf,DISTRICTS`NO`DISPLAY),%0)))
+&CONFIG`DISTRICTS`NO`DISPLAY [u(cobj,grid)]=Districts to leave out of displayed chains of district names
+&CONFIG`DISTRICTS`NO`DISPLAY`CUSTOM [u(cobj,grid)]=#6400 #6397 #6399
+
 &CMD`+GRID`PENNMUSH [u(cobj,grid)]=$^(?s)\+(grid|district)(?\:/(\S+)?)?(?\: +(.+?))?(?\:=(.*))?$:@attach %!/CMD`+GRID`MAIN
 @set [u(cobj,grid)]/CMD`+GRID`PENNMUSH=regexp
 &CMD`+GRID`RHOSTMUSH [u(cobj,grid)]=$^(?s)\+(grid|district)(?\:/(\\S+)?)?(?\: +(.+?))?(?\:=(.*))?$:@attach %!/CMD`+GRID`MAIN
