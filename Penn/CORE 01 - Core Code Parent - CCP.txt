@@ -672,7 +672,7 @@ think if(isdbref(u(cobj,ccp)),,setq(0,create(Core Code Parent <CCP>))[tel(%q0,co
 @@ Used to make sure that entered value is a good name for a database entity.
 
 @@ MOVEMENT SECTION
-&INC`CANRELOCATE [u(cobj,ccp)]=@select/inline cor(u(isadmin,%#),u(isadmin,%0))=0,{@check elock(loc(%0)/leave,%0)=@attach %!/INC`MSG=LEAVE @lock Failure.;@check elock(%1/Enter,%0)=@attach %!/INC`MSG=ENTER @lock failure.;@check elock(%1/Teleport,%0)=@attach %!/INC`MSG=TELEPORT @lock failure.}
+&INC`CANRELOCATE [u(cobj,ccp)]=@select/inline cor(u(isadmin,%#),u(isadmin,%0))=0,{@check elock(loc(%0)/leave,%0)=@attach %!/INC`MSG=LEAVE @lock Failure.;@check elock(%1/Enter,%0)=@attach %!/INC`MSG=ENTER @lock failure.;@check elock(%1/Teleport,%0)=@attach %!/INC`MSG=TELEPORT @lock failure.;@check cor(cand(hastype(%1,THING),get(%1/PORT)),cand(hastype(%1,ROOM),match(lparent(%1),num(u(cobj,ancestor_room)))))=@attach %!/INC`MSG={switch(type(%1),ROOM,The room [name(%1)] is not connected to the main parent room. Contact staff if this seems in error.,THING,You can only +port to an object like [name(%1)] if it has &PORT set to 1 to show it is used for RP and cleared for teleport.,The destination [name(%1)] is neither a room nor an object.)}}
 
 &INC`RELOCATE [u(cobj,ccp)]=@select/inline u(ishidden,%0)=1,{@tel/silent %0=%1},{@tel %0=%1}
 
